@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+ 
+</body>
+
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>SINCERE STUDENTS — Study Portal</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- HLS.js for .m3u8 playback -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    :root{
+      --bg:#0e0f13; --panel:#151823; --muted:#9aa2b1; --brand:#6ee7ff; --accent:#6df3c6; --danger:#ff6b6b;
+    }
+    html,body{height:100%; background: radial-gradient(1200px 800px at 20% -10%, #162033 0%, transparent 60%), radial-gradient(1200px 800px at 120% 30%, #19283d 0%, transparent 60%), var(--bg); color:#e9eef7;}
+    .glass{background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius:16px;}
+    .shadow-soft{box-shadow:0 10px 30px rgba(0,0,0,0.35);}
+    .brand-grad{background: linear-gradient(90deg, var(--brand), var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+    .btn-brand{background: linear-gradient(90deg, var(--brand), var(--accent)); border:none; color:#001018;}
+    .btn-brand:hover{filter: brightness(1.1);}
+    .chip{display:inline-flex; align-items:center; gap:.4rem; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); padding:.35rem .6rem; border-radius:999px; font-size:.85rem; color:#cfe6f6;}
+    .footer-link{color:#cfe6f6; text-decoration:none;}
+    .footer-link:hover{text-decoration:underline;}
+    .section-title{font-weight:700; letter-spacing:.4px;}
+    .divider{height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);}
+    .card-lesson{transition:transform .15s ease, box-shadow .15s ease;}
+    .card-lesson:hover{transform:translateY(-2px); box-shadow:0 12px 24px rgba(0,0,0,.35);}
+    .dropdown-menu{background:#0f1320; border:1px solid rgba(255,255,255,.08);}
+    .dropdown-item{color:#e9eef7;}
+    .dropdown-item:hover{background:#151b2a;}
+    /* Book shelf */
+    .shelf{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:16px;}
+    .book{background:#121623; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:14px;}
+    .book h6{margin:0 0 6px 0; color:#e9eef7;}
+    .book small{color:var(--muted);}
+    .sticky-topbar{position:sticky; top:0; z-index:1030; background:linear-gradient(180deg, rgba(14,15,19,.85), rgba(14,15,19,.55)); backdrop-filter: blur(6px); border-bottom:1px solid rgba(255,255,255,.08);}
+    /* Player */
+    #videoContainer{background:#000; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.08);}
+    /* Hide default seed-reset button on small details */
+    .text-muted-2{color:#aeb6c3;}
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <nav class="sticky-topbar">
+    <div class="container py-3 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-3">
+        <span class="chip"><i class="bi bi-shield-check"></i> SINCERE STUDENTS</span>
+        <span class="chip"><i class="bi bi-collection-play"></i> Study Portal</span>
+      </div>
+
+      <div class="dropdown">
+        <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+          Admin & More
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#adminModal"><i class="bi bi-lock"></i> Admin Login</a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#shivamModal"><i class="bi bi-braces"></i> SHIVAM’S LOGIN</a></li>
+          <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#requestModal"><i class="bi bi-envelope"></i> Request Batches & Books</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="#" id="resetDataBtn"><i class="bi bi-arrow-counterclockwise"></i> Reset Demo Data (safe)</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav><main class="container my-4">
+
+    <!-- Access: Class → Batch (Year) → Subject → Chapter → Lecture -->
+    <div class="glass shadow-soft p-3 p-md-4 mb-4">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <h3 class="section-title m-0">Choose Your Lecture</h3>
+        <span class="text-muted-2">Tip: Change Class & Year to access different batches.</span>
+      </div>
+      <div class="divider my-3"></div>
+
+      <div class="row g-3">
+        <div class="col-12 col-md-2">
+          <label class="form-label">Class</label>
+          <select id="selClass" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-2">
+          <label class="form-label">Batch / Year</label>
+          <select id="selBatch" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-2">
+          <label class="form-label">Subject</label>
+          <select id="selSubject" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Chapter / Topic</label>
+          <select id="selChapter" class="form-select"></select>
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Lecture</label>
+          <select id="selLecture" class="form-select"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player -->
+    <div class="glass shadow-soft p-3 p-md-4 mb-4">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <h4 class="m-0">Player</h4>
+        <span class="chip" id="currentInfo">Select a lecture…</span>
+      </div>
+      <div class="divider my-3"></div>
+
+      <div id="videoContainer" class="ratio ratio-16x9">
+        <video id="player" playsinline controls></video>
+      </div>
+
+      <div class="mt-3 d-flex flex-wrap gap-2">
+        <a id="openInTab" class="btn btn-outline-light btn-sm" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Open Direct Link</a>
+        <a id="downloadBtn" class="btn btn-brand btn-sm" download><i class="bi bi-download"></i> Download</a>
+      </div>
+    </div>
+
+    <!-- Book Shelf -->
+    <div class="glass shadow-soft p-3 p-md-4 mb-5">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <h4 class="m-0">Book Shelf</h4>
+        <div class="d-flex gap-2">
+          <select id="bookClass" class="form-select form-select-sm"></select>
+          <button class="btn btn-brand btn-sm" data-bs-toggle="modal" data-bs-target="#addBookModal"><i class="bi bi-plus-circle"></i> Add Book (Admin)</button>
+        </div>
+      </div>
+      <div class="divider my-3"></div>
+      <div id="bookShelf" class="shelf"></div>
+    </div>
+
+  </main>
+
+  <footer class="container text-center pb-5">
+    <div class="display-6 brand-grad fw-bold">PROUDLY OWNED AND DEVELOPED WEB BY</div>
+    <a class="display-6 fw-bold footer-link" href="https://t.me/Shi1296" target="_blank">SHIVAM SINGH</a>
+  </footer><!-- Admin Modal -->
+  <div class="modal fade" id="adminModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content glass">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-lock"></i> Admin Portal</h5>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Simple password (front-end only) -->
+          <div class="mb-3">
+            <label class="form-label">Admin Password</label>
+            <input type="password" id="adminPass" class="form-control" placeholder="Enter admin password…">
+            <div class="form-text text-muted-2">Front-end lock only; don’t share publicly.</div>
+          </div>
+
+          <div id="adminPanel" style="display:none;">
+            <div class="alert alert-info">Update any lecture link. If it exists, it will be replaced automatically.</div>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label">Class</label>
+                <select id="aClass" class="form-select"></select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Batch / Year</label>
+                <select id="aBatch" class="form-select"></select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Subject</label>
+                <select id="aSubject" class="form-select"></select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Chapter</label>
+                <select id="aChapter" class="form-select"></select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Lecture</label>
+                <select id="aLecture" class="form-select"></select>
+              </div>
+              <div class="col-md-9">
+                <label class="form-label">New Lecture Link (Drive / m3u8 / workers.dev)</label>
+                <input id="aLink" class="form-control" placeholder="Paste new link here">
+              </div>
+              <div class="col-12">
+                <button id="saveLectureBtn" class="btn btn-brand"><i class="bi bi-save"></i> Save / Replace</button>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="alert alert-secondary">Manage seed data (only if required)</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button id="exportJsonBtn" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-down"></i> Export links.json</button>
+              <input type="file" id="importJsonInput" accept="application/json" hidden>
+              <button id="importJsonBtn" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up"></i> Import links.json</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="adminEnterBtn" class="btn btn-brand">Enter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shivam's Code Modal -->
+  <div class="modal fade" id="shivamModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content glass">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-braces"></i> SHIVAM’S LOGIN (Direct Code)</h5>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" id="shivamPass" class="form-control" placeholder="Enter password…">
+          </div>
+          <div id="shivamPanel" style="display:none;">
+            <div class="alert alert-warning">Password correct. Click to open your code editor (CodePen online):</div>
+            <a class="btn btn-brand" href="https://codepen.io/pen" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Open Code Editor</a>
+            <div class="form-text text-muted-2 mt-2">Private password: <code>MYWEBPAGEMYRULE</code></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="shivamEnterBtn" class="btn btn-brand">Enter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Modal -->
+  <div class="modal fade" id="requestModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content glass">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-envelope"></i> Request Batches & Books</h5>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Your Request</label>
+            <textarea id="reqText" class="form-control" rows="4" placeholder="Write batch/book request…"></textarea>
+          </div>
+          <div class="form-text text-muted-2">All requests are sent to: <strong>mk4527223@gmail.com</strong></div>
+        </div>
+        <div class="modal-footer">
+          <a id="sendReqBtn" class="btn btn-brand" target="_blank"><i class="bi bi-send"></i> Send via Email</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Book Modal -->
+  <div class="modal fade" id="addBookModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content glass">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-journal-plus"></i> Add Book (Admin)</h5>
+          <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label class="form-label">Admin Password</label>
+            <input type="password" id="bookAdminPass" class="form-control" placeholder="Enter admin password…">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Class</label>
+            <select id="bookForClass" class="form-select"></select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Book Title</label>
+            <input id="bookTitle" class="form-control" placeholder="e.g., Chemistry NCERT 2025">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Book Link (PDF / Drive / site)</label>
+            <input id="bookLink" class="form-control" placeholder="https://...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="saveBookBtn" class="btn btn-brand"><i class="bi bi-save"></i> Save Book</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- Scripts -->
+  <script>
+    /**********************
+     * CONFIG / CONSTANTS *
+     **********************/
+    const ADMIN_PASSWORD = "admin123"; // <-- change to your secret
+    const SHIVAM_PASSWORD = "MYWEBPAGEMYRULE";
+    const STORAGE_KEY = "SS_PORTAL_DATA_V1";     // lectures + structure
+    const BOOKS_KEY   = "SS_PORTAL_BOOKS_V1";    // book shelf
+    const EMAIL_TO    = "mk4527223@gmail.com";
+
+    /**********************
+     * DEFAULT SEED DATA  *
+     * (Only used if no data in localStorage)
+     **********************/
+    const seedData = {
+      "Class IX": {
+        "Neev 2.0": {
+          "2023": {
+            "Chemistry": {
+              "Matter in Our Surroundings": {
+                "Lecture 1": "https://dl.kpsbots.workers.dev/watch/687ba07a6c791b43bb90bbb2"
+              }
+            },
+            "Maths": {
+              "Number Systems": {
+                "Lecture 1": "https://example.com/ix-maths-numbers-1.mp4"
+              }
+            }
+          },
+          "2024": {
+            "Physics": {
+              "Motion": { "Lecture 1": "https://example.com/ix-phy-motion-1.mp4" }
+            }
+          },
+          "2025": {
+            "Chemistry": {
+              "Is Matter Around Us Pure": { "Lecture 1": "https://example.com/ix-chem-pure-1.m3u8" }
+            }
+          }
+        }
+      },
+      "Class X": {
+        "Udaan": {
+          "2024": {
+            "Maths": {
+              "Quadratic Equations": { "Lecture 1": "https://example.com/x-maths-quad-1.mp4" }
+            }
+          },
+          "2025": {
+            "Science": {
+              "Chemical Reactions": { "Lecture 1": "https://example.com/x-sci-chemrxn-1.m3u8" }
+            }
+          }
+        }
+      },
+      "Class XI": {
+        "Arjuna JEE": {
+          "2024": {
+            "Maths": {
+              "Sets, Relations & Functions": { "Lecture 1": "https://example.com/xi-jee-maths-srf-1.mp4" }
+            }
+          },
+          "2025": {
+            "Physics": {
+              "Units & Measurements": { "Lecture 1": "https://example.com/xi-jee-phy-units-1.m3u8" }
+            }
+          }
+        }
+      }
+    };
+
+    const seedBooks = {
+      "Class IX": [
+        { title: "Maths NCERT 2025", link: "https://example.com/ix-maths-ncert.pdf" },
+        { title: "Science NCERT 2025", link: "https://example.com/ix-sci-ncert.pdf" }
+      ],
+      "Class X": [
+        { title: "Maths NCERT 2025", link: "https://example.com/x-maths-ncert.pdf" }
+      ],
+      "Class XI": [
+        { title: "JEE Physics Units & Measurements Notes", link: "https://example.com/xi-jee-phy-units-notes.pdf" }
+      ]
+    };
+
+    /**********************
+     * STORAGE HELPERS    *
+     **********************/
+    function loadData(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){ try { return JSON.parse(raw); } catch(e){ console.warn("Data parse error", e); } }
+      // Only seed if empty
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
+      return JSON.parse(JSON.stringify(seedData));
+    }
+    function saveData(obj){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+    }
+    function loadBooks(){
+      const raw = localStorage.getItem(BOOKS_KEY);
+      if(raw){ try { return JSON.parse(raw); } catch(e){ console.warn("Books parse error", e); } }
+      localStorage.setItem(BOOKS_KEY, JSON.stringify(seedBooks));
+      return JSON.parse(JSON.stringify(seedBooks));
+    }
+    function saveBooks(obj){
+      localStorage.setItem(BOOKS_KEY, JSON.stringify(obj));
+    }
+    function resetSeeds(){
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(BOOKS_KEY);
+      loadEverythingFresh();
+    }
+
+    /**********************
+     * GLOBAL STATE       *
+     **********************/
+    let DB = loadData();        // lectures + structure
+    let BOOKS = loadBooks();    // books
+    const el = id => document.getElementById(id);
+
+    /**********************
+     * RENDER SELECTORS   *
+     **********************/
+    function renderClassOptions(){
+      const s = el('selClass'); const a = el('aClass'); const b = el('bookClass'); const bf = el('bookForClass');
+      [s,a,b,bf].forEach(sel => { sel.innerHTML=''; });
+
+      Object.keys(DB).forEach(cls=>{
+        [s,a,b,bf].forEach(sel=>{
+          const opt=document.createElement('option'); opt.value=cls; opt.textContent=cls; sel.appendChild(opt.cloneNode(true));
+        });
+      });
+      // trigger dependent renders
+      onClassChange(); onAdminClassChange(); renderBookShelfClass();
+    }
+
+    function onClassChange(){
+      const cls = el('selClass').value || Object.keys(DB)[0];
+      const batchSel = el('selBatch');
+      batchSel.innerHTML='';
+      const batches = Object.keys(DB[cls]);
+      batches.forEach(b=>{
+        const opt=document.createElement('option'); opt.value=b; opt.textContent=b; batchSel.appendChild(opt);
+      });
+      onBatchChange();
+    }
+
+    function onBatchChange(){
+      const cls = el('selClass').value;
+      const batch = el('selBatch').value;
+      const yearsSel = el('selSubject'); // we’ll map: Subject selector appears AFTER Year selector — but to keep UI compact we embed Year into Batch display
+      // Actually create a Year selector separately? To keep UX simple, we combine "Batch / Year" in a single selector earlier.
+      // We will provide Year selection INSIDE batch name: The earlier UI has "Batch / Year" as separate select. Fix:
+    }
+
+    // We actually need separate Year select (we already have selBatch for batch name; add selYear logically by using subject slot swap):
+    // To avoid changing markup, we’ll repurpose: selBatch = Year; and we need a true Batch select too.
+    // But you asked for clear access → let's implement properly: We'll treat "selBatch" as Year *inside* the chosen batch (because each class has one batch brand in your model).
+    // Update: adjust data access pipeline below:
+
+    function buildPipeline() {
+      // from selects
+      const cls = el('selClass').value;
+      const batchBrand = Object.keys(DB[cls])[0]; // e.g., "Neev 2.0" / "Udaan" / "Arjuna JEE"
+      // selBatch actually holds Year in this simpler layout:
+      const year = el('selBatch').value;
+
+      const subjectsSel = el('selSubject');
+      const chaptersSel = el('selChapter');
+      const lecturesSel = el('selLecture');
+
+      // Fill Years into selBatch
+      const years = Object.keys(DB[cls][batchBrand]);
+      if (el('selBatch').childElementCount !== years.length) {
+        el('selBatch').innerHTML='';
+        years.forEach(y=>{
+          const opt=document.createElement('option'); opt.value=y; opt.textContent=y; el('selBatch').appendChild(opt);
+        });
+      }
+
+      const subjects = Object.keys(DB[cls][batchBrand][el('selBatch').value]||{});
+      subjectsSel.innerHTML='';
+      subjects.forEach(sub=>{
+        const opt=document.createElement('option'); opt.value=sub; opt.textContent=sub; subjectsSel.appendChild(opt);
+      });
+
+      const chapters = Object.keys(DB[cls][batchBrand][el('selBatch').value]?.[subjectsSel.value]||{});
+      chaptersSel.innerHTML='';
+      chapters.forEach(ch=>{
+        const opt=document.createElement('option'); opt.value=ch; opt.textContent=ch; chaptersSel.appendChild(opt);
+      });
+
+      const lectures = Object.keys(DB[cls][batchBrand][el('selBatch').value]?.[subjectsSel.value]?.[chaptersSel.value]||{});
+      lecturesSel.innerHTML='';
+      lectures.forEach(l=>{
+        const opt=document.createElement('option'); opt.value=l; opt.textContent=l; lecturesSel.appendChild(opt);
+      });
+
+      updateCurrentInfo();
+      loadSelectedIntoPlayer();
+    }
+
+    function updateCurrentInfo(){
+      const cls = el('selClass').value;
+      const batchBrand = Object.keys(DB[cls])[0];
+      const year = el('selBatch').value;
+      const subject = el('selSubject').value;
+      const chapter = el('selChapter').value;
+      const lecture = el('selLecture').value;
+      el('currentInfo').textContent = `${cls} • ${batchBrand} • ${year} • ${subject} • ${chapter} • ${lecture}`;
+    }
+
+    function loadSelectedIntoPlayer(){
+      const cls = el('selClass').value;
+      const batchBrand = Object.keys(DB[cls])[0];
+      const year = el('selBatch').value;
+      const subject = el('selSubject').value;
+      const chapter = el('selChapter').value;
+      const lecture = el('selLecture').value;
+
+      const link = (((DB[cls]||{})[batchBrand]||{})[year]||{})[subject]?.[chapter]?.[lecture] || "";
+      setPlayerSource(link);
+    }
+
+    /**********************
+     * PLAYER (HLS aware) *
+     **********************/
+    function setPlayerSource(url){
+      const video = el('player');
+      const openBtn = el('openInTab');
+      const dlBtn = el('downloadBtn');
+
+      openBtn.href = url || "#";
+      dlBtn.href   = url || "#";
+
+      if(!url){ video.removeAttribute('src'); video.load(); return; }
+
+      if (url.endsWith(".m3u8")){
+        if(Hls.isSupported()){
+          if(window._hls) { window._hls.destroy(); }
+          const hls = new Hls();
+          window._hls = hls;
+          hls.loadSource(url);
+          hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')){
+          video.src = url; // Safari
+        } else {
+          // Fallback: open in new tab
+          video.removeAttribute('src');
+        }
+      } else {
+        if(window._hls){ window._hls.destroy(); }
+        video.src = url;
+      }
+      video.load();
+    }
+
+    /**********************
+     * BOOK SHELF         *
+     **********************/
+    function renderBookShelfClass(){
+      const sel = el('bookClass');
+      sel.innerHTML='';
+      Object.keys(BOOKS).forEach(c=>{
+        const opt=document.createElement('option'); opt.value=c; opt.textContent=c; sel.appendChild(opt);
+      });
+      renderBooks();
+    }
+    function renderBooks(){
+      const cls = el('bookClass').value;
+      const shelf = el('bookShelf');
+      shelf.innerHTML='';
+      const list = BOOKS[cls] || [];
+      list.forEach(b=>{
+        const d=document.createElement('div');
+        d.className="book";
+        d.innerHTML = `
+          <h6><i class="bi bi-book"></i> ${escapeHTML(b.title)}</h6>
+          <small class="d-block mb-2">${cls}</small>
+          <a href="${b.link}" target="_blank" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-up-right"></i> Open</a>
+        `;
+        shelf.appendChild(d);
+      });
+    }
+    function escapeHTML(s){ return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
+
+    /**********************
+     * ADMIN: GATE        *
+     **********************/
+    function fillAdminSelectors(){
+      const c = el('aClass'), b = el('aBatch'), s = el('aSubject'), ch = el('aChapter'), l = el('aLecture');
+      // Class
+      c.innerHTML='';
+      Object.keys(DB).forEach(cls=>{ const o=document.createElement('option'); o.value=cls; o.textContent=cls; c.appendChild(o); });
+      onAdminClassChange();
+    }
+
+    function onAdminClassChange(){
+      const cls = el('aClass').value;
+      const batchBrand = Object.keys(DB[cls])[0];
+      // Years
+      const years = Object.keys(DB[cls][batchBrand]);
+      const bSel = el('aBatch'); bSel.innerHTML='';
+      years.forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; bSel.appendChild(o); });
+      onAdminYearChange();
+    }
+    function onAdminYearChange(){
+      const cls = el('aClass').value;
+      const batchBrand = Object.keys(DB[cls])[0];
+      const year = el('aBatch').value;
+      // Subjects
+      const sSel = el('aSubject'); sSel.innerHTML='';
+      Object.keys(DB[cls][batchBrand][year]||{}).forEach(sub=>{
+        const o=document.createElement('option'); o.value=sub; o.textContent=sub; sSel.appendChild(o);
+      });
+      onAdminSubjectChange();
+    }
+    function onAdminSubjectChange(){
+      const cls = el('aClass').value;
+      const batchBrand = Object.keys(DB[cls])[0];
+      const year = el('aBatch').value;
+      const sub = el('aSubject').value;
+      const chSel = el('aChapter'); chSel.innerHTML='';
+      Object.keys(DB[cls][batchBrand][year]?.[sub]||{}).forEach(ch=>{
+        const o=document.createElement('option'); o.value=ch; o.textContent=ch; chSel.appendChild(o);
+      });
+      onAdminChapterChange();
+    }
+    function onAdminChapterChange(){
+      const cls = el('aClass').value;
+      const batchBrand = Object.keys(DB[cls])[0];
+      const year = el('aBatch').value;
+      const sub = el('aSubject').value;
+      const chapter = el('aChapter').value;
+      const lSel = el('aLecture'); lSel.innerHTML='';
+      Object.keys(DB[cls][batchBrand][year]?.[sub]?.[chapter]||{}).forEach(lec=>{
+        const o=document.createElement('option'); o.value=lec; o.textContent=lec; lSel.appendChild(o);
+      });
+      // Allow admin to create a new lecture number easily:
+      const newOpt=document.createElement('option'); newOpt.value="NEW: Lecture X"; newOpt.textContent="➕ NEW: Lecture X"; lSel.appendChild(newOpt);
+    }
+
+    /**********************
+     * ADMIN: ACTIONS     *
+     **********************/
+    function adminEnter(){
+      const pass = el('adminPass').value;
+      if(pass === ADMIN_PASSWORD){
+        el('adminPanel').style.display='block';
+        fillAdminSelectors();
+      }else{
+        alert("Wrong admin password.");
+      }
+    }
+    function shivamEnter(){
+      const pass = el('shivamPass').value;
+      if(pass === SHIVAM_PASSWORD){
+        el('shivamPanel').style.display='block';
+      }else{
+        alert("Wrong password.");
+      }
+    }
+
+    function saveLecture(){
+      const cls = el('aClass').value;
+      const batchBrand = Object.keys(DB[cls])[0];
+      const year = el('aBatch').value;
+      const sub = el('aSubject').value;
+      const chapter = el('aChapter').value;
+      let lec = el('aLecture').value;
+      const link = el('aLink').value.trim();
+      if(!link){ alert("Paste a lecture link."); return; }
+      if(lec.startsWith("NEW:")){
+        // auto-number next
+        const existing = Object.keys(DB[cls][batchBrand][year]?.[sub]?.[chapter]||{});
+        const next = existing.length+1;
+        lec = `Lecture ${next}`;
+      }
+      // Ensure path exists
+      DB[cls] = DB[cls] || {};
+      DB[cls][batchBrand] = DB[cls][batchBrand] || {};
+      DB[cls][batchBrand][year] = DB[cls][batchBrand][year] || {};
+      DB[cls][batchBrand][year][sub] = DB[cls][batchBrand][year][sub] || {};
+      DB[cls][batchBrand][year][sub][chapter] = DB[cls][batchBrand][year][sub][chapter] || {};
+      // Replace (overwrite) old link or add new
+      DB[cls][batchBrand][year][sub][chapter][lec] = link;
+      saveData(DB);
+      alert(`Saved: ${cls} / ${batchBrand} / ${year} / ${sub} / ${chapter} / ${lec}`);
+      buildPipeline();
+      el('aLink').value='';
+    }
+
+    // Books
+    function saveBook(){
+      const pass = el('bookAdminPass').value;
+      if(pass !== ADMIN_PASSWORD){ alert("Wrong admin password."); return; }
+      const cls = el('bookForClass').value;
+      const title = el('bookTitle').value.trim();
+      const link = el('bookLink').value.trim();
+      if(!title || !link){ alert("Enter title and link."); return; }
+      BOOKS[cls] = BOOKS[cls] || [];
+      // If same title exists, replace link
+      const idx = BOOKS[cls].findIndex(b=>b.title.toLowerCase()===title.toLowerCase());
+      if(idx>=0){ BOOKS[cls][idx].link = link; } else { BOOKS[cls].push({title, link}); }
+      saveBooks(BOOKS);
+      el('bookTitle').value=''; el('bookLink').value=''; el('bookAdminPass').value='';
+      renderBooks();
+      alert("Book saved.");
+    }
+
+    // Export / Import links.json
+    function exportJson(){
+      const a = document.createElement('a');
+      const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+      a.href = URL.createObjectURL(blob);
+      a.download = 'links.json';
+      a.click();
+    }
+    function importJson(){
+      el('importJsonInput').click();
+    }
+    el('importJsonInput')?.addEventListener('change', e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const obj = JSON.parse(reader.result);
+          DB = obj;
+          saveData(DB);
+          renderClassOptions();
+          alert("Imported links.json successfully.");
+        }catch(err){
+          alert("Invalid JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Request email link
+    function prepareRequestEmail(){
+      const txt = encodeURIComponent(el('reqText').value.trim());
+      const href = `mailto:${EMAIL_TO}?subject=${encodeURIComponent("Sincere Students Request")}&body=${txt}`;
+      el('sendReqBtn').href = href;
+    }
+
+    // Reset button (safe)
+    el('resetDataBtn').addEventListener('click', ()=>{
+      if(confirm("Reset demo data? This will remove current lectures and books stored in this browser.")){
+        resetSeeds();
+        alert("Demo data reset. (Your real data on this device is cleared.)");
+      }
+    });
+
+    /**********************
+     * HOOK UP EVENTS     *
+     **********************/
+    // Student selectors
+    el('selClass').addEventListener('change', buildPipeline);
+    el('selBatch').addEventListener('change', buildPipeline);
+    el('selSubject').addEventListener('change', buildPipeline);
+    el('selChapter').addEventListener('change', buildPipeline);
+    el('selLecture').addEventListener('change', ()=>{ updateCurrentInfo(); loadSelectedIntoPlayer(); });
+
+    // Admin
+    el('adminEnterBtn').addEventListener('click', adminEnter);
+    el('shivamEnterBtn').addEventListener('click', shivamEnter);
+    el('saveLectureBtn').addEventListener('click', saveLecture);
+    el('exportJsonBtn').addEventListener('click', exportJson);
+    el('importJsonBtn').addEventListener('click', importJson);
+
+    // Books
+    el('bookClass').addEventListener('change', renderBooks);
+    el('saveBookBtn').addEventListener('click', saveBook);
+
+    // Request
+    el('reqText').addEventListener('input', prepareRequestEmail);
+
+    /**********************
+     * INIT               *
+     **********************/
+    function loadEverythingFresh(){
+      DB = loadData();
+      BOOKS = loadBooks();
+      renderClassOptions();
+      buildPipeline();
+      renderBooks();
+    }
+    // First paint
+    loadEverythingFresh();
+
+        </script><!-- Bootstrap bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

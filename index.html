@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Study Sincerely — Ultra Animated</title>
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- Reset ---------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:'Poppins',sans-serif;
+      color:#fff;
+      background:#081124;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* ---------- Animated Gradient Layer ---------- */
+    :root{
+      --accentA:#6b21a8; /* purple */
+      --accentB:#0ea5e9; /* cyan */
+      --accentC:#f97316; /* orange */
+    }
+    .bg-anim{
+      position:fixed; inset:0; z-index:-2; pointer-events:none;
+      background:linear-gradient(120deg,var(--accentA),var(--accentB),var(--accentC));
+      background-size: 600% 600%;
+      animation: gradientMove 18s linear infinite;
+      filter: blur(30px) saturate(120%);
+      opacity:0.9;
+    }
+    @keyframes gradientMove{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    /* ---------- Particle Canvas (above gradient) ---------- */
+    #particle-canvas{
+      position:fixed; inset:0; z-index:-1; pointer-events:none;
+      mix-blend-mode: screen;
+    }
+
+    /* ---------- Header / Nav ---------- */
+    header{
+      position:sticky; top:0; z-index:100; display:flex; align-items:center;
+      justify-content:space-between; gap:12px;
+      padding:12px 18px;
+      background:linear-gradient(180deg, rgba(2,6,23,0.55), rgba(2,6,23,0.25));
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{width:36px;height:36px;border-radius:8px;object-fit:cover}
+    .brand h1{
+      font-size:16px;font-weight:700;
+      background:linear-gradient(90deg,#ffb86b,#ff6bcb);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      letter-spacing:0.2px;
+      text-shadow:0 6px 20px rgba(0,0,0,0.45);
+    }
+
+    nav{display:flex;gap:10px;align-items:center}
+    nav a{
+      color:#fff;text-decoration:none;font-weight:600;padding:8px 12px;border-radius:999px;
+      background:rgba(255,255,255,0.04);backdrop-filter:blur(6px);
+      box-shadow:0 6px 16px rgba(2,6,23,0.35);
+      transform:translateY(6px);opacity:0;animation:navIn .7s ease forwards;
+    }
+    nav a:nth-child(1){animation-delay:.28s}
+    nav a:nth-child(2){animation-delay:.44s}
+    nav a:nth-child(3){animation-delay:.6s}
+    nav a:nth-child(4){animation-delay:.76s}
+    nav a:hover{ background:#ffe082; color:#111; transform:translateY(0) scale(1.05); box-shadow:0 8px 32px rgba(255,224,130,0.12) }
+
+    @keyframes navIn { to{transform:none;opacity:1} }
+
+    .hamburger{display:none; cursor:pointer}
+    .hamburger div{width:22px;height:2px;background:#fff;margin:4px 0;transition:0.25s}
+
+    /* ---------- Header small utilities ---------- */
+    .controls{display:flex;gap:10px;align-items:center}
+    .sound-toggle{
+      width:40px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-weight:700;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero{
+      text-align:center;padding:72px 18px 34px;max-width:1100px;margin:18px auto 6px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border-radius:14px;box-shadow:0 14px 50px rgba(2,6,23,0.5);
+      backdrop-filter: blur(6px);
+    }
+    .hero h2{font-size:30px;color:#ffe082;margin-bottom:10px;letter-spacing:0.2px}
+    .hero p{color:rgba(255,255,255,0.85);margin-bottom:12px}
+    .cta{display:inline-block;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:800;
+      background:linear-gradient(90deg,#7c3aed,#0ea5e9);color:#fff;box-shadow:0 10px 30px rgba(14,13,60,0.45)}
+    .typewriter{border-right:2px solid #ffe082;padding-right:6px}
+
+    /* ---------- Platforms Grid ---------- */
+    .platforms{ max-width:1200px;margin:22px auto;padding:18px; display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:18px;align-items:start }
+    .card{
+      background:#fff;color:#081124;border-radius:12px;overflow:hidden;
+      box-shadow:0 12px 38px rgba(2,6,23,0.45);
+      transform:translateY(20px) scale(.98); opacity:0; transition:all .45s cubic-bezier(.2,.9,.2,1);
+    }
+    .card.visible{transform:translateY(0) scale(1); opacity:1}
+    .card img{width:100%;height:140px;object-fit:cover;transition:transform .5s,filter .5s}
+    .card:hover img{transform:scale(1.06) rotate(.6deg); filter:brightness(1.08) drop-shadow(0 0 18px rgba(14,165,233,.12))}
+    .card .body{padding:12px 14px}
+    .card h3{font-size:16px;margin-bottom:6px}
+    .card p{font-size:13px;color:#334155}
+    .card .btn{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:8px;text-decoration:none;
+      background:linear-gradient(90deg,#0ea5e9,#7c3aed);color:#fff;font-weight:700}
+
+    /* ---------- Footer ---------- */
+    footer{max-width:1200px;margin:26px auto 80px;padding:18px;text-align:center;color:rgba(255,255,255,0.9)}
+    #credits{display:inline-block;padding:8px 12px;border-radius:8px;background:linear-gradient(90deg,#adff2f,#ffb199);color:#111;font-weight:800;animation:bounce 1.6s infinite}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+    /* ---------- Loader Overlay ---------- */
+    #loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:9999;visibility:hidden;opacity:0;transition:all .18s}
+    #loader.active{visibility:visible;opacity:1}
+    .dots{display:flex;gap:8px}
+    .dots span{width:10px;height:10px;background:#fff;border-radius:50%;transform:scale(.6);animation:pop .9s infinite}
+    .dots span:nth-child(2){animation-delay:.12s} .dots span:nth-child(3){animation-delay:.24s}
+    @keyframes pop{0%{transform:scale(.6);opacity:.6}50%{transform:scale(1.15);opacity:1}100%{transform:scale(.6);opacity:.6}}
+
+    /* ---------- Responsiveness ---------- */
+    @media(max-width:880px){ .hamburger{display:block} nav{display:none} header{padding:10px} .hero{padding:48px 14px} }
+  </style>
+</head>
+<body>
+
+  <!-- Animated gradient background -->
+  <div class="bg-anim" aria-hidden="true"></div>
+
+  <!-- Particle canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <img src="SINCERESTUDENT.png" alt="logo" />
+      <h1>कर्मण्येवाधिकारस्ते — Study Sincerely</h1>
+    </div>
+
+    <nav>
+      <a href="https://t.me/Shi1296" target="_blank">Telegram</a>
+      <a href="https://whatsapp.com/channel/0029Vb7HLQOElagxbGUB4L0f" target="_blank">WhatsApp</a>
+      <a href="#" >Admins Portal</a>
+      <a href="secon.html">Request App</a>
+    </nav>
+
+    <div class="controls">
+      <div class="sound-toggle" id="soundToggle" title="Toggle sound">🔊</div>
+      <div class="hamburger" id="hamb"><div></div><div></div><div></div></div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" role="region" aria-label="Intro">
+    <h2><span id="type" class="typewriter" aria-live="polite"></span></h2>
+    <p>Explore top learning platforms — free resources compiled in one place for smart study.</p>
+    <a class="cta" href="#platforms" id="exploreBtn">Explore Platforms →</a>
+  </section>
+
+  <!-- Platforms -->
+  <main id="platforms">
+    <div class="platforms" role="list">
+      <!-- Cards (images should be placed in images/ folder) -->
+      <a class="card" href="https://pwthor.site" target="_blank" role="listitem">
+        <img src="logo.png" alt="Physics Wallah">
+        <div class="body"><h3>Physics Wallah</h3><p>High-quality video lectures & study materials.</p><a class="btn" href="#" aria-label="Open Physics Wallah">Open</a></div>
+      </a>
+
+      <a class="card" href="http://RolexCoderZ.xyz/Course" target="_blank" role="listitem">
+        <img src="IMG_20250902_134214.jpg" alt="Next Topper">
+        <div class="body"><h3>Next Topper</h3><p>Exam-focused courses & practice sets.</p><a class="btn" href="#" aria-label="Open Next Topper">Open</a></div>
+      </a>
+
+      <a class="card" href="https://others.streamfiles.eu.org/cw/" target="_blank" role="listitem">
+        <img src="coaching-16759702633.jpg" alt="Carrerwill">
+        <div class="body"><h3>Carrerwill</h3><p>Guidance and coaching resources.</p><a class="btn" href="#" aria-label="Open Carrerwill">Open</a></div>
+      </a>
+
+      <a class="card" href="https://others.streamfiles.eu.org/kgs/" target="_blank" role="listitem">
+        <img src="IMG_20250908_151605.jpg" alt="KGS">
+        <div class="body"><h3>KGS</h3><p>Local coaching bundles and notes.</p><a class="btn" href="#" aria-label="Open KGS">Open</a></div>
+      </a>
+
+      <a class="card" href="https://others.streamfiles.eu.org/vidyakul/" target="_blank" role="listitem">
+        <img src="images (1).jpeg" alt="Vidyakul">
+        <div class="body"><h3>Vidyakul</h3><p>Recorded lessons & PDFs.</p><a class="btn" href="#" aria-label="Open Vidyakul">Open</a></div>
+      </a>
+
+      <a class="card" href="https://others.streamfiles.eu.org/motion" target="_blank" role="listitem">
+        <img src="IMG_20250908_165311.jpg" alt="Motion">
+        <div class="body"><h3>Motion</h3><p>Live classes and doubt sessions.</p><a class="btn" href="#" aria-label="Open Motion">Open</a></div>
+      </a>
+
+      <a class="card" href="https://others.streamfiles.eu.org/educationbaba/" target="_blank" role="listitem">
+        <img src="IMG_20250908_173835.jpg" alt="Education Baba">
+        <div class="body"><h3>Education Baba</h3><p>Notes, sample papers & more.</p><a class="btn" href="#" aria-label="Open Education Baba">Open</a></div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© All rights reserved 2025 — 2080 by Official Hosting Programs</p>
+    <div id="credits">♥ Made with love — Shivam Singh</div>
+  </footer>
+
+  <!-- Loader -->
+  <div id="loader" aria-hidden="true"><div class="dots"><span></span><span></span><span></span></div></div>
+
+  <!-- Scripts: particles, typewriter, audio, interactions -->
+  <script>
+  /* ==========================
+     Simple WebAudio helpers
+     ========================== */
+  const AudioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+  let soundEnabled = true;
+  const soundToggle = document.getElementById('soundToggle');
+  if(soundToggle){
+    soundToggle.addEventListener('click', ()=>{
+      // toggle state
+      soundEnabled = !soundEnabled;
+      soundToggle.textContent = soundEnabled ? '🔊' : '🔈';
+      // resume context on user gesture if needed
+      if(soundEnabled && AudioCtx && AudioCtx.state === 'suspended') AudioCtx.resume();
+    });
+  }
+
+  function playBeep({freq=880, type='sine', dur=0.08, gain=0.08, when=0} = {}){
+    if(!AudioCtx || !soundEnabled) return;
+    const t = AudioCtx.currentTime + when;
+    const o = AudioCtx.createOscillator();
+    const g = AudioCtx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.02);
+    o.connect(g); g.connect(AudioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
+
+  function playClick(){
+    playBeep({freq:1200, dur:0.05, gain:0.06, type:'triangle'});
+  }
+
+  function playLoadSequence(){
+    if(!AudioCtx || !soundEnabled) return;
+    // simple 3-tone chime
+    playBeep({freq:880, dur:0.12, gain:0.06, when:0});
+    playBeep({freq:1100, dur:0.12, gain:0.06, when:0.12});
+    playBeep({freq:1350, dur:0.12, gain:0.06, when:0.24});
+  }
+
+  /* ==========================
+     Typewriter (hero)
+     ========================== */
+  const txts=["We are live — Explore top learning platforms.","Free resources, compiled for you.","Study smart. Study sincerely."];
+  let idx=0,pos=0,forward=true;
+  const el=document.getElementById('type');
+  function typeStep(){
+    const full=txts[idx];
+    if(forward){
+      pos++; el.textContent = full.slice(0,pos);
+      if(pos === full.length){ forward=false; setTimeout(typeStep,1200); return; }
+    } else {
+      pos--; el.textContent = full.slice(0,pos);
+      if(pos === 0){ forward=true; idx=(idx+1)%txts.length; }
+    }
+    setTimeout(typeStep, forward?80:30);
+  }
+  // start typing after small delay
+  setTimeout(()=>{ typeStep(); if(soundEnabled) playLoadSequence(); }, 320);
+
+  /* ==========================
+     Loader for external link clicks
+     ========================== */
+  document.querySelectorAll('a[target="_blank"]').forEach(a=>{
+    a.addEventListener('click', e=>{
+      const loader = document.getElementById('loader');
+      loader.classList.add('active');
+      if(soundEnabled) playClick();
+      setTimeout(()=> loader.classList.remove('active'), 900);
+    });
+    a.addEventListener('mousedown', ()=> { if(soundEnabled) playClick(); });
+  });
+
+  // click for CTA
+  const exploreBtn = document.getElementById('exploreBtn');
+  if(exploreBtn) exploreBtn.addEventListener('click', ()=> { if(soundEnabled) playClick(); });
+
+  /* ==========================
+     Reveal cards with IntersectionObserver
+     ========================== */
+  const cards = document.querySelectorAll('.card');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach((entry, i) => {
+      if(entry.isIntersecting){
+        setTimeout(()=> entry.target.classList.add('visible'), 60);
+        // small sound when first batch appears
+        if(soundEnabled) playBeep({freq:520, dur:0.04, gain:0.03});
+      }
+    });
+  }, {threshold: 0.18});
+  cards.forEach(c => io.observe(c));
+
+  /* ==========================
+     Hamburger toggle
+     ========================== */
+  const hamb = document.getElementById('hamb');
+  hamb && hamb.addEventListener('click', ()=>{
+    const nav = document.querySelector('nav');
+    if(!nav) return;
+    const shown = getComputedStyle(nav).display !== 'none';
+    nav.style.display = shown ? 'none' : 'flex';
+    if(soundEnabled) playClick();
+  });
+
+  /* ==========================
+     Particle System (Canvas)
+     ========================== */
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let w = canvas.width = innerWidth;
+  let h = canvas.height = innerHeight;
+  const particles = [];
+  const PARTICLE_COUNT = Math.max(40, Math.floor((w*h)/90000)); // scale by size
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+  function createParticle(){
+    return {
+      x: rand(0,w),
+      y: rand(0,h),
+      r: rand(0.6,2.8),
+      vx: rand(-0.15,0.15),
+      vy: rand(-0.2,0.2),
+      hue: rand(180,260),
+      life: rand(40,220),
+      maxLife: rand(80,320),
+      sway: rand(0.001,0.006),
+    };
+  }
+  for(let i=0;i<PARTICLE_COUNT;i++) particles.push(createParticle());
+
+  function resize(){
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+  }
+  addEventListener('resize', ()=>{ resize(); });
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    for(let p of particles){
+      p.x += p.vx;
+      p.y += p.vy + Math.sin((p.life+p.sway*performance.now())*0.002)*0.2;
+      p.life++;
+      // respawn edges
+      if(p.x < -20 || p.x > w+20 || p.y < -40 || p.y > h+40 || p.life > p.maxLife){
+        Object.assign(p, createParticle());
+        p.x = rand(0,w);
+        p.y = -20;
+      }
+      // nice glow
+      const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*14);
+      g.addColorStop(0, `hsla(${p.hue},90%,70%,0.12)`);
+      g.addColorStop(0.3, `hsla(${p.hue},80%,60%,0.08)`);
+      g.addColorStop(1, `hsla(${p.hue},80%,50%,0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r*3,0,Math.PI*2);
+      ctx.fill();
+    }
+    // optional connecting lines (subtle)
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const a=particles[i], b=particles[j];
+        const dx=a.x-b.x, dy=a.y-b.y, d=dx*dx+dy*dy;
+        if(d<9000){
+          ctx.strokeStyle = `rgba(120,180,255,${0.008 + (9000-d)/9000*0.05})`;
+          ctx.lineWidth=0.6;
+          ctx.beginPath();
+          ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  /* ==========================
+     Animated gradient subtle speed change on mouse
+     ========================== */
+  (function gradientMouse(){
+    const bg = document.querySelector('.bg-anim');
+    let mx=0,my=0;
+    addEventListener('mousemove', (e)=>{
+      mx = (e.clientX/innerWidth - 0.5)*12;
+      my = (e.clientY/innerHeight - 0.5)*6;
+      bg.style.transform = `translate(${mx}px, ${my}px) scale(1.02)`;
+    });
+  })();
+
+  /* ==========================
+     Small accessibility: enable audio by first user gesture if blocked
+     ========================== */
+  function userGestureEnableAudio(){
+    if(!AudioCtx) return;
+    if(AudioCtx.state === 'suspended') AudioCtx.resume();
+    // play a tiny click to confirm
+    playBeep({freq:640,dur:0.04,gain:0.04});
+    window.removeEventListener('pointerdown', userGestureEnableAudio);
+  }
+  window.addEventListener('pointerdown', userGestureEnableAudio, {once:true});
+
+  /* ==========================
+     Small UX: fade in hero after load
+     ========================== */
+  window.addEventListener('load', ()=> {
+    document.querySelector('.hero').style.opacity = 1;
+  });
+  </script>
+  <script>
+  // Disable right click
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  
+  // Disable F12, Ctrl+Shift+I/J/C/U
+  document.addEventListener('keydown', e => {
+    if (e.key === "F12" ||
+      (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+      (e.ctrlKey && e.key === "U")) {
+      e.preventDefault();
+    }
+  });
+</script><script>
+  setInterval(() => {
+    const start = Date.now();
+    debugger; // agar devtools khula hai to yeh lag karega
+    if (Date.now() - start > 100) {
+      alert("Developer Tools Detected 🚫");
+      location.reload(); // ya window.close();
+    }
+  }, 1000);
+</script><script>
+  (function() {
+    const element = new Image();
+    Object.defineProperty(element, 'id', {
+      get: function () {
+        document.body>";
+      }
+    });
+    console.log(element);
+  })();
+</script><script>
+// Enhanced developer tools detection
+(function() {
+    'use strict';
+    
+    let devtoolsOpen = false;
+    const threshold = 160;
+    
+    // Method 1: Check window dimensions difference
+    const checkDevTools = function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        
+        if (!(heightThreshold && widthThreshold) && 
+            ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || 
+             widthThreshold || heightThreshold)) {
+            devtoolsOpen = true;
+            handleDevToolsDetection();
+        } else {
+            devtoolsOpen = false;
+        }
+    };
+    
+    // Method 2: Debugger statement with timing
+    const debuggerCheck = function() {
+        const start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+            devtoolsOpen = true;
+            handleDevToolsDetection();
+        }
+    };
+    
+    // Method 3: Console property access
+    const consoleCheck = function() {
+        const element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: function() {
+                devtoolsOpen = true;
+                handleDevToolsDetection();
+            }
+        });
+        console.log(element);
+    };
+    
+    // Handle detection
+    function handleDevToolsDetection() {
+        // Clear page content
+        document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;background:#081124;color:white;font-family:Poppins,sans-serif;text-align:center;padding:20px;"><h2 style="color:#ffe082;">Developer Tools Detected</h2><p>This action is not permitted on this site.</p><p>Please close developer tools to continue.</p></div>';
+        
+        // Disable all keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        
+        // Prevent right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // Stop all execution
+        throw new Error("Developer Tools detected");
+    }
+    
+    // Run checks periodically
+    setInterval(checkDevTools, 1000);
+    setInterval(debuggerCheck, 2000);
+    setInterval(consoleCheck, 3000);
+    
+    // Initial check
+    checkDevTools();
+    
+    // Also check on resize (devtools might open/close)
+    window.addEventListener('resize', checkDevTools);
+    
+    // Disable right click
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    
+    // Disable keyboard shortcuts
+    document.addEventListener('keydown', e => {
+        if (e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey && ["I", "J", "C", "U"].includes(e.key)) ||
+            (e.ctrlKey && e.key === "U") ||
+            (e.metaKey && e.altKey && e.key === "I")) { // For Mac
+            e.preventDefault();
+            handleDevToolsDetection();
+        }
+    });
+})();
+</script>
+</body>
+</html>
